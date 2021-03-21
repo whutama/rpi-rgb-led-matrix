@@ -1,0 +1,23 @@
+login:
+ssh pi@raspberrypi
+or
+ssh pi@192.168.11.97
+pass:
+w821997
+
+commands:
+sudo ./clock_mod --led-rows 64 --led-cols 64 --led-brightness=50 -d %H:%M -f ../fonts/10x20.bdf &
+
+exit:
+-check pid:
+top
+-kill process:
+sudo kill [pid of daemon daemon process -1]
+
+example:
+ 1403 daemon    20   0   13956   3784   2304 S  62.6   0.4   0:51.96 clock
+ 1425 pi        20   0   10396   2992   2480 R   0.7   0.3   0:03.65 top
+    1 root      20   0   33668   8216   6608 S   0.0   0.9   0:04.95 systemd
+    2 root      20   0       0      0      0 S   0.0   0.0   0:00.01 kthreadd
+
+sudo kill 1402
