@@ -15,12 +15,22 @@ static void InterruptHandler(int signo){
 static void DrawOnCanvas(Canvas *canvas){
     int center_x = canvas->width() / 2;
     int center_y = canvas->height() / 2;
-    int length = center_x;
+    int length = canvas->width();
     for(int a=0;a<length;a++){
         if(interrupt_received) return;
-        canvas->SetPixel((center_x/2)+a, center_y, 0, 0, 255);
-        usleep(1 * 20000);
+        canvas->SetPixel(a, center_y, 0, 0, 255);
+	for(int b=0;b<=a;b++){
+	    int c = b*10;
+	    if(c>255){
+		c = 255;
+	    }
+            canvas->SetPixel(a-b, center_y, 0, 0, 255-c);
+	}
+//	canvas->SetPixel(0, 0, 255, 0, 0);
+//	canvas->SetPixel(1, 1, 0, 255, 0);
+        usleep(1 * 40000);
     }
+    sleep(10);
 }
 
 int main(int argc, char *argv[]){
