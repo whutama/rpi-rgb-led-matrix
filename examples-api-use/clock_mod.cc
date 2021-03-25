@@ -175,9 +175,10 @@ int main(int argc, char *argv[]) {
     localtime_r(&next_time.tv_sec, &tm);
 
 
-    if(temp == next_time.tv_sec){
+    if(temp != next_time.tv_sec){
       x = rand()%x_orig_max;
       y = rand()%y_orig_max;
+      temp = next_time.tv_sec;
     }
 
 
