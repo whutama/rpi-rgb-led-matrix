@@ -169,16 +169,21 @@ int main(int argc, char *argv[]) {
   signal(SIGINT, InterruptHandler);
 
   int temp = next_time.tv_sec;
+  int counter = 600;
 
   while (!interrupt_received) {
     offscreen->Fill(bg_color.r, bg_color.g, bg_color.b);
     localtime_r(&next_time.tv_sec, &tm);
 
-
     if(temp != next_time.tv_sec){
+      temp = next_time.tv_sec;
+      counter--;
+    }
+
+    if(counter == 0){
       x = rand()%x_orig_max;
       y = rand()%y_orig_max;
-      temp = next_time.tv_sec;
+      counter = 600;
     }
 
 
