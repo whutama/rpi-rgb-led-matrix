@@ -14,13 +14,14 @@ static void InterruptHandler(int signo){
 int length;
 int dir; //0=right, 1=up, 2=left, 3=down
 
-struct Snake{
+struct Coor{
     int x;
     int y;
 };
+struct Coor snake[1000];
+struct Coor food;
 
 void initSnake(){
-    struct Snake snake[1000];
     snake[0] = {32,32};
     snake[1] = {33,32};
     snake[2] = {34,32};
@@ -31,7 +32,7 @@ void initSnake(){
     dir = 0;
 }
 
-void drawSnake(Canvas *canvas, Snake *snake){
+void drawSnake(Canvas *canvas){
 //    canvas->SetPixel(snake[999].x, snake[999].y, 0, 0, 0);
 //    erase
     int color = 25;
@@ -43,27 +44,76 @@ void drawSnake(Canvas *canvas, Snake *snake){
     }
 }
 
-void moveSnake(Canvas *canvas, Snake *snake){
+void moveSnake(Canvas *canvas){
     for (int i=0;i<length-1;i++){
         snake[i] = snake[i+1];
     }
+    switch (dir){
+    case 0:
+        snake[length-1].x = (snake[length-1].x + 1)%64;
+        break;
+    case 1:
+        snake[length-1].x = (snake[length-1].y - 1)%64;
+        break;
+    case 2:
+        snake[length-1].x = (snake[length-1].x - 1)%64;
+        break;
+    case 3:
+        snake[length-1].x = (snake[length-1].y + 1)%64;
+        break;
+    default:
+        break;
+    }
+}
 
+Coor summonFood(){
+    Coor temp;
+    temp.x = rand()%64;
+    temp.y = rand()%64;
+    for(int i=0;i<length;i++){
+        if(snake[i].x==temp.x && snake[i].y==temp.y){
+            return summonFood();
+        }
+    }
+    return temp;
+}
+
+void drawFood(Canvas *canvas){
+    canvas->SetPixel(food.x, food.y, 0, 100, 0);
+}
+
+void growSnake(){
+    length++;
+    switch (dir){
+    case 0:
+        snake[length-1].x += 1;
+        break;
+    case 1:
+        snake[length-1].y -= 1;
+        break;
+    case 2:
+        snake[length-1].x -= 1;
+        break;
+    case 3:
+        snake[length-1].y += 1;
+        break;
+    default:
+        break;
+    }
+    food = summonFood();
 }
 
 static void DrawOnCanvas(Canvas *canvas){
     int center_x = canvas->width() / 2;
     int center_y = canvas->height() / 2;
     int length = canvas->width();
-    for(int a=0;a<length;a++){
+    initSnake();
+    food = summonFood();
+    while(1){
         if(interrupt_received) return;
-        canvas->SetPixel(a, center_y, 0, 0, 255);
-	    for(int b=0;b<=a;b++){
-	        int c = b*10;
-	        if(c>255){
-		        c = 255;
-	        }
-            canvas->SetPixel(a-b, center_y, 0, 0, 255-c);
-	    }
+        drawSnake(canvas);
+        moveSnake(canvas);
+
 //	canvas->SetPixel(0, 0, 255, 0, 0);
 //	canvas->SetPixel(1, 1, 0, 255, 0);
         usleep(1 * 40000);
@@ -74,6 +124,7 @@ static void DrawOnCanvas(Canvas *canvas){
 
 
 int main(int argc, char *argv[]){
+    srand(time(NULL));
     RGBMatrix::Options defaults;
     defaults.hardware_mapping = "regular";
     defaults.rows = 64;
