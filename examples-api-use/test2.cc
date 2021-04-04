@@ -33,7 +33,7 @@ void initSnake(){
 }
 
 void drawSnake(Canvas *canvas){
-//    canvas->SetPixel(snake[999].x, snake[999].y, 0, 0, 0);
+    canvas->SetPixel(snake[999].x, snake[999].y, 0, 0, 0);
 //    erase
     int color = 25;
     for(int i=0;i<length;i++){
@@ -44,7 +44,19 @@ void drawSnake(Canvas *canvas){
     }
 }
 
+void drawSnake2(Canvas *canvas){
+    canvas->SetPixel(snake[999].x, snake[999].y, 0, 0, 0);
+//    erase
+    int color = 10;
+    for(int i=0;i<6;i++){
+        color+=15;
+        canvas->SetPixel(snake[i].x, snake[i].y, 0, 0, color);
+    }
+    canvas->SetPixel(snake[length-1].x,snake[length-1].y,0,0,100);
+}
+
 void moveSnake(Canvas *canvas){
+    snake[999] = snake[0];
     for (int i=0;i<length-1;i++){
         snake[i] = snake[i+1];
     }
@@ -53,13 +65,13 @@ void moveSnake(Canvas *canvas){
         snake[length-1].x = (snake[length-1].x + 1)%64;
         break;
     case 1:
-        snake[length-1].x = (snake[length-1].y - 1)%64;
+        snake[length-1].y = (snake[length-1].y - 1)%64;
         break;
     case 2:
         snake[length-1].x = (snake[length-1].x - 1)%64;
         break;
     case 3:
-        snake[length-1].x = (snake[length-1].y + 1)%64;
+        snake[length-1].y = (snake[length-1].y + 1)%64;
         break;
     default:
         break;
@@ -74,6 +86,15 @@ Coor summonFood(){
         if(snake[i].x==temp.x && snake[i].y==temp.y){
             return summonFood();
         }
+    }
+    if(dir==0 && snake[length-1].y==food.y && snake[length-1].x > food.x){
+        return summonFood();
+    }else if(dir==1 && snake[length-1].x==food.x && snake[length-1].y < food.y){
+        return summonFood();
+    }else if(dir==2 && snake[length-1].y==food.y && snake[length-1].x < food.x){
+        return summonFood();
+    }else if(dir==3 && snake[length-1].x==food.x && snake[length-1].y > food.y){
+        return summonFood();
     }
     return temp;
 }
@@ -104,14 +125,34 @@ void growSnake(){
 }
 
 static void DrawOnCanvas(Canvas *canvas){
-    int center_x = canvas->width() / 2;
-    int center_y = canvas->height() / 2;
-    int length = canvas->width();
     initSnake();
     food = summonFood();
+    drawFood(canvas);
     while(1){
         if(interrupt_received) return;
-        drawSnake(canvas);
+        drawSnake2(canvas);
+        if((dir==0 || dir==2) && snake[length-1].x == food.x){
+            if(snake[length-1].y < food.y){
+                dir = 3;
+            }else if(snake[length-1].y > food.y){
+                dir = 1;
+            }else{
+                growSnake();
+                drawFood(canvas);
+                continue;
+            }
+        }
+        if((dir==1 || dir==3) && snake[length-1].y == food.y){
+            if(snake[length-1].x < food.x){
+                dir = 0;
+            }else if(snake[length-1].x > food.x){
+                dir = 2;
+            }else{
+                growSnake();
+                drawFood(canvas);
+                continue;
+            }
+        }
         moveSnake(canvas);
 
 //	canvas->SetPixel(0, 0, 255, 0, 0);
