@@ -6,7 +6,7 @@ pass:
 w821997
 
 commands:
-sudo ./clock --led-rows 64 --led-cols 64 --led-brightness=50 -d %H:%M -f ../fonts/10x20.bdf &
+sudo ./clock_mod --led-rows 64 --led-cols 64 --led-brightness=50 -d %H:%M -f ../fonts/10x20.bdf &
 
 exit:
 -check pid:
