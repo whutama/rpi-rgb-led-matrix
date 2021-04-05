@@ -34,41 +34,34 @@ void initSnake(){
 
 void drawSnake(Canvas *canvas){
     canvas->SetPixel(snake[999].x, snake[999].y, 0, 0, 0);
-//    erase
-    int color = 25;
-    for(int i=0;i<length;i++){
-        if(color<100){
-            color+=15;
-        }
-        canvas->SetPixel(snake[i].x, snake[i].y, 0, 0, color);
-    }
-}
-
-void drawSnake2(Canvas *canvas){
-    canvas->SetPixel(snake[999].x, snake[999].y, 0, 0, 0);
-//    erase
+    //erase last snake tail
     int color = 10;
     for(int i=0;i<6;i++){
         color+=15;
         canvas->SetPixel(snake[i].x, snake[i].y, 0, 0, color);
     }
-    canvas->SetPixel(snake[length-1].x,snake[length-1].y,0,0,100);
+    //draw last 6 snake tail
+    canvas->SetPixel(snake[length-2].x, snake[length-2].y, 0, 0, color);
+    canvas->SetPixel(snake[length-1].x, snake[length-1].y, color, color, color);
+    //draw snake head
 }
 
 void moveSnake(Canvas *canvas){
     snake[999] = snake[0];
+    //snake tail to be erased
     for (int i=0;i<length-1;i++){
         snake[i] = snake[i+1];
     }
+    //snake body
     switch (dir){
     case 0:
         snake[length-1].x = (snake[length-1].x + 1)%64;
         break;
     case 1:
-        snake[length-1].y = (snake[length-1].y - 1)%64;
+        snake[length-1].y = (snake[length-1].y + 63)%64;
         break;
     case 2:
-        snake[length-1].x = (snake[length-1].x - 1)%64;
+        snake[length-1].x = (snake[length-1].x + 63)%64;
         break;
     case 3:
         snake[length-1].y = (snake[length-1].y + 1)%64;
@@ -76,6 +69,7 @@ void moveSnake(Canvas *canvas){
     default:
         break;
     }
+    //snake head
 }
 
 Coor summonFood(){
@@ -87,7 +81,7 @@ Coor summonFood(){
             return summonFood();
         }
     }
-    if(dir==0 && snake[length-1].y==food.y && snake[length-1].x > food.x){
+    /*if(dir==0 && snake[length-1].y==food.y && snake[length-1].x > food.x){
         return summonFood();
     }else if(dir==1 && snake[length-1].x==food.x && snake[length-1].y < food.y){
         return summonFood();
@@ -95,7 +89,8 @@ Coor summonFood(){
         return summonFood();
     }else if(dir==3 && snake[length-1].x==food.x && snake[length-1].y > food.y){
         return summonFood();
-    }
+    }*/
+    printf("spawn food at (%d, %d)\n",temp.x, temp.y);
     return temp;
 }
 
@@ -105,6 +100,7 @@ void drawFood(Canvas *canvas){
 
 void growSnake(){
     length++;
+    snake[length-1] = snake[length-2];
     switch (dir){
     case 0:
         snake[length-1].x += 1;
@@ -121,34 +117,46 @@ void growSnake(){
     default:
         break;
     }
-    food = summonFood();
 }
 
 static void DrawOnCanvas(Canvas *canvas){
     initSnake();
     food = summonFood();
     drawFood(canvas);
+    printf("start\n");
     while(1){
         if(interrupt_received) return;
-        drawSnake2(canvas);
-        if((dir==0 || dir==2) && snake[length-1].x == food.x){
+        drawSnake(canvas);
+        if((dir==0 || dir==2) && (snake[length-1].x == food.x)){
             if(snake[length-1].y < food.y){
+                printf("go down\n");
                 dir = 3;
             }else if(snake[length-1].y > food.y){
+                printf("go up\n");
                 dir = 1;
             }else{
-                growSnake();
+                printf("spawn food\n");
+                if(length<999){
+                    growSnake();
+                }
+                food = summonFood();
                 drawFood(canvas);
                 continue;
             }
         }
-        if((dir==1 || dir==3) && snake[length-1].y == food.y){
+        if((dir==1 || dir==3) && (snake[length-1].y == food.y)){
             if(snake[length-1].x < food.x){
+                printf("go right\n");
                 dir = 0;
             }else if(snake[length-1].x > food.x){
+                printf("go left\n");
                 dir = 2;
             }else{
-                growSnake();
+                printf("spawn food\n");
+                if(length<999){
+                    growSnake();
+                }
+                food = summonFood();
                 drawFood(canvas);
                 continue;
             }
