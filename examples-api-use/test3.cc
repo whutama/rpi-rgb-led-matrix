@@ -12,7 +12,7 @@ static void InterruptHandler(int signo){
     interrupt_received = true;
 }
 int length;
-int dir; //0=right, 1=up, 2=left, 3=down
+int dir; //1=right, 2=up, 4=left, 8=down
 
 struct Coor{
     int x;
@@ -31,9 +31,9 @@ void initSnake(){
     snake[4] = {36,32};
     snake[5] = {37,32};
     length = 6;
-    dir = 0;
+    dir = 1;
     for(int i=0;i<64;i++){
-        for(int j=0,j<64;j++){
+        for(int j=0;j<64;j++){
             locations[i][j] = 0;
         }
     }
@@ -67,24 +67,24 @@ void moveSnake(Canvas *canvas){
     }
     //snake body
     switch (dir){
-    case 0:
+    case 1:
         snake[length-1].x = (snake[length-1].x + 1)%64;
         break;
-    case 1:
+    case 2:
         snake[length-1].y = (snake[length-1].y + 63)%64;
         break;
-    case 2:
+    case 4:
         snake[length-1].x = (snake[length-1].x + 63)%64;
         break;
-    case 3:
+    case 8:
         snake[length-1].y = (snake[length-1].y + 1)%64;
         break;
     default:
         break;
     }
     //snake head
-    locations[snake[999].x][snake[999.y]] = 0;
-    locations[snake[length-1].x][snake[length-1.y]] = 1;
+    locations[snake[999].x][snake[999].y] = 0;
+    locations[snake[length-1].x][snake[length-1].y] = 1;
 }
 
 Coor summonFood(){
@@ -96,13 +96,13 @@ Coor summonFood(){
             return summonFood();
         }
     }
-    /*if(dir==0 && snake[length-1].y==food.y && snake[length-1].x > food.x){
+    /*if(dir==1 && snake[length-1].y==food.y && snake[length-1].x > food.x){
         return summonFood();
-    }else if(dir==1 && snake[length-1].x==food.x && snake[length-1].y < food.y){
+    }else if(dir==2 && snake[length-1].x==food.x && snake[length-1].y < food.y){
         return summonFood();
-    }else if(dir==2 && snake[length-1].y==food.y && snake[length-1].x < food.x){
+    }else if(dir==4 && snake[length-1].y==food.y && snake[length-1].x < food.x){
         return summonFood();
-    }else if(dir==3 && snake[length-1].x==food.x && snake[length-1].y > food.y){
+    }else if(dir==8 && snake[length-1].x==food.x && snake[length-1].y > food.y){
         return summonFood();
     }*/
     printf("spawn food at (%d, %d)\n",temp.x, temp.y);
@@ -115,20 +115,20 @@ void drawFood(Canvas *canvas){
 }
 
 void checkCollision(Canvas *canvas){
-    int next_x=0;
-    int next_y=0;
+    int next_x = 0;
+    int next_y = 0;
     switch (dir){
-    case 0:
-        next_x=1;
-        break;
     case 1:
-        next_y=-1;
+        next_x = 1;
         break;
     case 2:
-        next_x=-1;
+        next_y = -1;
         break;
-    case 3:
-        next_y=1;
+    case 4:
+        next_x = -1;
+        break;
+    case 8:
+        next_y = 1;
         break;
     default:
         break;
@@ -136,28 +136,98 @@ void checkCollision(Canvas *canvas){
     if(locations[snake[length-1].x + next_x][snake[length-1].y + next_y] == 2){
         growSnake();
     }else if(locations[snake[length-1].x + next_x][snake[length-1].y + next_y] == 1){
-        dir = (dir + 3) % 4
-        if(locations[snake[length-1].x + next_x][snake[length-1].y + next_y] == 1){}
+        checkRoute();
         moveSnake(canvas);
     }else{
         moveSnake(canvas);
     }
 }
 
+void checkRoute(){
+    int vertical = 0;
+    int horizontal = 0;
+    horizontal = food.x - snake[length-1].x;
+    vertical = food.y - snake[length-1].y;
+    if(dir == 1 || dir == 4){
+        //go vertical
+        if(vertical < 0){
+            if(locations[snake[length-1].x][snake[length-1].y - 1] == 0){
+                dir = 2;
+            }else if(locations[snake[length-1].x][snake[length-1].y - 1] == 1){
+                dir = 8;
+            }
+        }else if(vertical > 0){
+            if(locations[snake[length-1].x][snake[length-1].y + 1] == 0){
+                dir = 8;
+            }else if(locations[snake[length-1].x][snake[length-1].y + 1] == 1){
+                dir = 2;
+            }
+        }else{
+            if(locations[snake[length-1].x][snake[length-1].y + 1] == 0){
+                dir = 8;
+            }else if(locations[snake[length-1].x][snake[length-1].y + 1] == 1){
+                dir = 2;
+            }
+        }
+    }else if(dir == 2 || dir == 8){
+        //go horizontal
+        if(horizontal < 0){
+            if(locations[snake[length-1].x - 1][snake[length-1].y] == 0){
+                dir = 4;
+            }else if(locations[snake[length-1].x - 1][snake[length-1].y] == 1){
+                dir = 1;
+            }
+        }else if(horizontal > 0){
+            if(locations[snake[length-1].x + 1][snake[length-1].y] == 0){
+                dir = 1;
+            }else if(locations[snake[length-1].x + 1][snake[length-1].y] == 1){
+                dir = 4;
+            }
+        }else{
+            if(locations[snake[length-1].x + 1][snake[length-1].y] == 0){
+                dir = 1;
+            }else if(locations[snake[length-1].x + 1][snake[length-1].y] == 1){
+                dir = 4;
+            }
+        }
+    }
+    /*
+    if(horizontal < 0){
+        //go left
+        ;
+    }else if(horizontal > 0){
+        //go right
+        ;
+    }else{
+        ;
+    }
+    if(vertical < 0){
+        //go up
+        ;
+    }else if(vertical > 0){
+        //go down
+        ;
+    }else{
+        ;
+    }*/
+    //check food direction
+    
+}
+
 void growSnake(){
     length++;
     snake[length-1] = snake[length-2];
     switch (dir){
-    case 0:
+    case 1:
         snake[length-1].x += 1;
         break;
-    case 1:
+    case 2:
         snake[length-1].y -= 1;
         break;
-    case 2:
+    case 4:
         snake[length-1].x -= 1;
         break;
-    case 3:
+    case 8:
         snake[length-1].y += 1;
         break;
     default:
@@ -173,13 +243,13 @@ static void DrawOnCanvas(Canvas *canvas){
     while(1){
         if(interrupt_received) return;
         drawSnake(canvas);
-        if((dir==0 || dir==2) && (snake[length-1].x == food.x)){
+        if((dir==1 || dir==4) && (snake[length-1].x == food.x)){
             if(snake[length-1].y < food.y){
                 printf("go down\n");
-                dir = 3;
+                dir = 8;
             }else if(snake[length-1].y > food.y){
                 printf("go up\n");
-                dir = 1;
+                dir = 2;
             }else{
                 printf("spawn food\n");
                 if(length<999){
@@ -190,13 +260,13 @@ static void DrawOnCanvas(Canvas *canvas){
                 continue;
             }
         }
-        if((dir==1 || dir==3) && (snake[length-1].y == food.y)){
+        if((dir==2 || dir==8) && (snake[length-1].y == food.y)){
             if(snake[length-1].x < food.x){
                 printf("go right\n");
-                dir = 0;
+                dir = 1;
             }else if(snake[length-1].x > food.x){
                 printf("go left\n");
-                dir = 2;
+                dir = 4;
             }else{
                 printf("spawn food\n");
                 if(length<999){
