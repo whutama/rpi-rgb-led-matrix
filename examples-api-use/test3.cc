@@ -114,35 +114,6 @@ void drawFood(Canvas *canvas){
     canvas->SetPixel(food.x, food.y, 0, 100, 0);
 }
 
-void checkCollision(Canvas *canvas){
-    int next_x = 0;
-    int next_y = 0;
-    switch (dir){
-    case 1:
-        next_x = 1;
-        break;
-    case 2:
-        next_y = -1;
-        break;
-    case 4:
-        next_x = -1;
-        break;
-    case 8:
-        next_y = 1;
-        break;
-    default:
-        break;
-    }
-    if(locations[snake[length-1].x + next_x][snake[length-1].y + next_y] == 2){
-        growSnake();
-    }else if(locations[snake[length-1].x + next_x][snake[length-1].y + next_y] == 1){
-        checkRoute();
-        moveSnake(canvas);
-    }else{
-        moveSnake(canvas);
-    }
-}
-
 void checkRoute(){
     int vertical = 0;
     int horizontal = 0;
@@ -235,6 +206,35 @@ void growSnake(){
     }
 }
 
+void checkCollision(Canvas *canvas){
+    int next_x = 0;
+    int next_y = 0;
+    switch (dir){
+    case 1:
+        next_x = 1;
+        break;
+    case 2:
+        next_y = -1;
+        break;
+    case 4:
+        next_x = -1;
+        break;
+    case 8:
+        next_y = 1;
+        break;
+    default:
+        break;
+    }
+    if(locations[snake[length-1].x + next_x][snake[length-1].y + next_y] == 2){
+        growSnake();
+    }else if(locations[snake[length-1].x + next_x][snake[length-1].y + next_y] == 1){
+        checkRoute();
+        moveSnake(canvas);
+    }else{
+        moveSnake(canvas);
+    }
+}
+
 static void DrawOnCanvas(Canvas *canvas){
     initSnake();
     food = summonFood();
@@ -281,7 +281,7 @@ static void DrawOnCanvas(Canvas *canvas){
 
 //	canvas->SetPixel(0, 0, 255, 0, 0);
 //	canvas->SetPixel(1, 1, 0, 255, 0);
-        usleep(10 * 40000);
+        usleep(1 * 80000);
     }
     sleep(10);
 }
