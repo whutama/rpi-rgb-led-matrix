@@ -121,6 +121,24 @@ void growSnake(){
     }
 }
 
+int CheckLose(){
+    for(int i=0;i<length-1;i++){
+        if((snake[length-1].x == snake[i].x) && (snake[length-1].y == snake[i].y)){
+            printf("You lose!\n");
+            return 1;
+        }
+    }
+    return 0;
+}
+
+void LoseScreen(Canvas *canvas){
+    sleep(1);
+    for(int i=length-1;i>=0;i--){
+        canvas->SetPixel(snake[i].x, snake[i].y, 0, 0, 0);
+        usleep(40000);
+    }
+}
+
 static void DrawOnCanvas(Canvas *canvas){
     char inp = 'd';
     initSnake();
@@ -133,16 +151,24 @@ static void DrawOnCanvas(Canvas *canvas){
         read(STDIN_FILENO, &inp, 1);
         switch (inp){
         case 'w':
-            dir = 1;
+            if(dir!=3){
+                dir = 1;
+            }
             break;
         case 'a':
-            dir = 2;
+            if(dir!=0){
+                dir = 2;
+            }
             break;
         case 's':
-            dir = 3;
+            if(dir!=1){
+                dir = 3;
+            }
             break;
         case 'd':
-            dir = 0;
+            if(dir!=2){
+                dir = 0;
+            }
             break;
         default:
             break;
@@ -153,6 +179,10 @@ static void DrawOnCanvas(Canvas *canvas){
             drawFood(canvas);
         }
         moveSnake(canvas);
+        if(CheckLose()){
+            LoseScreen(canvas);
+            return;
+        }
 
 //	canvas->SetPixel(0, 0, 255, 0, 0);
 //	canvas->SetPixel(1, 1, 0, 255, 0);
